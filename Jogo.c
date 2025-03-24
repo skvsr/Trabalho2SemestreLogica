@@ -23,6 +23,16 @@ typedef struct {
     int valor;
 } Item;
 
+// Funcao do personagem
+Personagem criaPersonagem(char nome[50], int forca, int velocidade) {
+    Personagem p;
+    printf("Digite o nome do personagem: ");
+    scanf("%s", p.nome);
+    p.forca = forca;
+    p.velocidade = 1;
+    return p;
+}
+
 int main() {
     int hj;
     int nasc;
