@@ -12,14 +12,12 @@ typedef struct {
 
 // struct do inimigo
 typedef struct {
-    char nome[50];
     int forca;
     int velocidade;
 } Inimigo;
 
 // struct de item
 typedef struct {
-    char nome[50];
     int valor;
 } Item;
 
@@ -31,6 +29,21 @@ Personagem criaPersonagem(char nome[50], int forca, int velocidade) {
     p.forca = forca;
     p.velocidade = 1;
     return p;
+}
+
+// Funcao do inimigo
+Inimigo criaInimigo(int forca, int velocidade) {
+    Inimigo i;
+    i.forca = forca;
+    i.velocidade = velocidade;
+    return i;
+}
+
+// Funcao do item
+Item criaItem(int valor) {
+    Item item;
+    item.valor = valor;
+    return item;
 }
 
 int main() {
