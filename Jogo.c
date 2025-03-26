@@ -75,7 +75,6 @@ void criarItem(Item Itens[], int quantidade, int tamanhoX, int tamanhoY, Inimigo
 
 int main() {
 
-    int test;
     int nada;
     
     printf("--------------------------------------------------------------------------------\n");
