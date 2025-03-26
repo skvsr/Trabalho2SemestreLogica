@@ -2,6 +2,7 @@
 #include <stdlib.h>
 #include <time.h>
 #include <string.h>
+#include <unistd.h>
 
 // struct do personagem
 typedef struct {
@@ -34,7 +35,7 @@ void criaPersonagem(Personagem *p, char nome[50], int forca, int velocidade) {
     p->y = 0;
 }
 
-// posição no mapa
+// posiï¿½ï¿½o no mapa
 int posicao(int x, int y, Inimigo Inimigos[], num numInimigos , Item Itens[], num numItens) {
     for (int i = 0; i < numInimigos; i++) {
         if (Inimigos[i].x == x && Inimigos[i].y == y && Inimigos[i].vida) {
@@ -74,5 +75,22 @@ void criarItem(Item Itens[], int quantidade, int tamanhoX, int tamanhoY, Inimigo
 
 int main() {
     
+    printf("--------------------------------------------------------------------------------\n");
+	printf("                              BEM VINDO AO                                      \n");
+	printf("                                RPG GAME!                                        \n");
+	printf("--------------------------------------------------------------------------------\n");
+	
+	Sleep(3);
+	
+	printf("                                   BY                                            \n");
+	printf("                              Henrique Costa                                     \n");
+	
+	Sleep(1);
+	printf("                             Samuel Pinheiro                                     \n");
+	
+	Sleep(2);
+	
+	printf("                               Samuel Vitor                                      \n");
+	
     return 0;
 }
