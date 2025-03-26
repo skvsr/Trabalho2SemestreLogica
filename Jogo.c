@@ -75,8 +75,6 @@ void criarItem(Item Itens[], int quantidade, int tamanhoX, int tamanhoY, Inimigo
 
 int main() {
 
-    char name[50];
-
     printf("--------------------------------------------------------------------------------\n");
 	printf("                              BEM VINDO AO                                      \n");
 	printf("                                RPG GAME!                                        \n");
