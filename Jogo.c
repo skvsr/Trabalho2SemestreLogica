@@ -6,7 +6,7 @@
 
 // struct do personagem
 typedef struct {
-    char nome[50];
+    char *nome;
     int forca;
     int velocidade;
     int x, y;
@@ -24,6 +24,23 @@ typedef struct {
     int valor;
     int x, y;
 } Item;
+
+// Ponteiros
+Personagem *p;
+Inimigo *inimigos;
+Item *itens;
+int numInimigos, numItens, tamanhoX, tamanhoY;
+
+void iniciar() {
+    p = (Personagem *)malloc(sizeof(Personagem));
+    p->nome = (char *)malloc(50 * sizeof(char));
+
+    numInimigos = (tamanhoX * tamanhoY) / 4;
+    numItens = (tamanhoX * tamanhoY) / 4;
+
+    inimigos = (Inimigo *)malloc(numInimigos * sizeof(Inimigo));
+    itens = (Item *)malloc(numItens * sizeof(Item));
+}
 
 // Funcao do personagem
 void criaPersonagem(Personagem *p, char nome[50], int forca, int velocidade) {
@@ -142,22 +159,34 @@ void encontros(Personagem *p, Inimigo Inimigos[], int numInimigos, Item Itens[],
 }
 // Funcao de movimento
 void mover(Personagem *p, char direcao, int tamanhoX, int tamanhoY) {
+    int rapido = p->velocidade;
     switch (direcao) {
         case 'w':
-            if (p->y > 0) p->y--;
+            if (p->y - rapido >= 0) p->y-= rapido;
+            else p->y = 0;
             break;
         case 's':
-            if (p->y < tamanhoY - 1) p->y++;
+            if (p->y + rapido < tamanhoY) p->y+= rapido;
+            else p->y = tamanhoY - 1;
             break;
         case 'a':
-            if (p->x > 0) p->x--;
+            if (p->x - rapido  >= 0) p->x-= rapido;
+            else p->x = 0;
             break;
         case 'd':
-            if (p->x < tamanhoX - 1) p->x++;
+            if (p->x + rapido < tamanhoX) p->x+= rapido;
+            else p->x = tamanhoX - 1;
             break;
         default:
             printf("Direcao invalida!\n");
     }
+}
+
+void liberarMemoria() {
+    free(p->nome);
+    free(p);
+    free(inimigos);
+    free(itens);
 }
 
 
