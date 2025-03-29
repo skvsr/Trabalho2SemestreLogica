@@ -2,7 +2,7 @@
 #include <stdlib.h>
 #include <time.h>
 #include <string.h>
-#include <unistd.h>
+#include <windows.h>
 
 // struct do personagem
 typedef struct {
@@ -28,15 +28,16 @@ typedef struct {
 // Funcao do personagem
 void criaPersonagem(Personagem *p, char nome[50], int forca, int velocidade) {
     printf("Digite o nome do personagem: ");
-    scanf("%s", p->nome);
-    p->forca = forca;
+    fgets(p->nome, sizeof(p->nome), stdin);
+    p->nome[strcspn(p->nome, "\n")] = 0;
+    p->forca = 10;
     p->velocidade = 1;
     p->x = 0;
     p->y = 0;
 }
 
-// posiï¿½ï¿½o no mapa
-int posicao(int x, int y, Inimigo Inimigos[], num numInimigos , Item Itens[], num numItens) {
+// posicao no mapa
+int posicao(int x, int y, Inimigo Inimigos[], int numInimigos , Item Itens[], int numItens) {
     for (int i = 0; i < numInimigos; i++) {
         if (Inimigos[i].x == x && Inimigos[i].y == y && Inimigos[i].vida) {
             return 1;
@@ -75,7 +76,15 @@ void criarItem(Item Itens[], int quantidade, int tamanhoX, int tamanhoY, Inimigo
 
 // Funcao do mapa
 void exibirMapa(int tamanhoX, int tamanhoY, Personagem *p, Inimigo Inimigos[], int numInimigos, Item Itens[], int numItens) {
+    //borda superior
+    printf("  ");
+    for (int i = 0; i < tamanhoX; i++) {
+        printf("--");
+    }
+    printf("-\n");
+    
     for (int i = 0; i < tamanhoY; i++) {
+        printf("| "); // borda lateral
         for (int j = 0; j < tamanhoX; j++) {
             if (i == p->y && j == p->x) {
                 printf("P ");
@@ -87,8 +96,23 @@ void exibirMapa(int tamanhoX, int tamanhoY, Personagem *p, Inimigo Inimigos[], i
                 printf(". ");
             }
         }
+        printf("|\n"); // borda lateral
         printf("\n");
     }
+    //borda inferior
+    printf("  ");
+    for (int i = 0; i < tamanhoX; i++) {
+        printf("--");
+    }
+    printf("-\n");
+}
+
+void Legendas() {
+    printf("\nLegenda:\n");
+    printf("P - Personagem\n");
+    printf("I - Inimigo\n");
+    printf("T - Item\n");
+    printf(". - Espaço vazio\n");
 }
 
 // Funcao de encontros
@@ -136,23 +160,6 @@ void mover(Personagem *p, char direcao, int tamanhoX, int tamanhoY) {
     }
 }
 
-// funcao gerar inimigos aleatorios
-void gerarInimigosAleatorios(Inimigo Inimigos[], int numInimigos, int tamanhoX, int tamanhoY) {
-    for (int i = 0; i < numInimigos; i++) {
-        Inimigos[i].x = rand() % tamanhoX;
-        Inimigos[i].y = rand() % tamanhoY;
-        Inimigos[i].forca = rand() % 10 + 1;
-        Inimigos[i].vida = 1;
-    }
-}
-// funcao gerar itens aleatorios
-void gerarItensAleatorios(Item Itens[], int numItens, int tamanhoX, int tamanhoY) {
-    for (int i = 0; i < numItens; i++) {
-        Itens[i].x = rand() % tamanhoX;
-        Itens[i].y = rand() % tamanhoY;
-        Itens[i].valor = rand() % 10 + 1;
-    }
-}
 
 int main() {
 
