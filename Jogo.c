@@ -73,6 +73,87 @@ void criarItem(Item Itens[], int quantidade, int tamanhoX, int tamanhoY, Inimigo
     }
 }
 
+// Funcao do mapa
+void exibirMapa(int tamanhoX, int tamanhoY, Personagem *p, Inimigo Inimigos[], int numInimigos, Item Itens[], int numItens) {
+    for (int i = 0; i < tamanhoY; i++) {
+        for (int j = 0; j < tamanhoX; j++) {
+            if (i == p->y && j == p->x) {
+                printf("P ");
+            } else if (posicao(j, i, Inimigos, numInimigos, Itens, numItens) == 1) {
+                printf("I ");
+            } else if (posicao(j, i, Inimigos, numInimigos, Itens, numItens) == 2) {
+                printf("T ");
+            } else {
+                printf(". ");
+            }
+        }
+        printf("\n");
+    }
+}
+
+// Funcao de encontros
+void encontros(Personagem *p, Inimigo Inimigos[], int numInimigos, Item Itens[], int numItens) {
+    for (int i = 0; i < numInimigos; i++) {
+        if (Inimigos[i].x == p->x && Inimigos[i].y == p->y && Inimigos[i].vida) {
+            printf("Voce encontrou um inimigo!\n");
+            printf("Forca do inimigo: %d\n", Inimigos[i].forca);
+            printf("Sua forca: %d\n", p->forca);
+            if (p->forca > Inimigos[i].forca) {
+                printf("Voce venceu o inimigo!\n");
+                Inimigos[i].vida = 0;
+            } else {
+                printf("Voce perdeu para o inimigo!\n");
+                exit(0);
+            }
+        }
+    }
+    for (int i = 0; i < numItens; i++) {
+        if (Itens[i].x == p->x && Itens[i].y == p->y) {
+            printf("Voce encontrou um item!\n");
+            printf("Valor do item: %d\n", Itens[i].valor);
+            p->forca += Itens[i].valor;
+            Itens[i].valor = 0;
+        }
+    }
+}
+// Funcao de movimento
+void mover(Personagem *p, char direcao, int tamanhoX, int tamanhoY) {
+    switch (direcao) {
+        case 'w':
+            if (p->y > 0) p->y--;
+            break;
+        case 's':
+            if (p->y < tamanhoY - 1) p->y++;
+            break;
+        case 'a':
+            if (p->x > 0) p->x--;
+            break;
+        case 'd':
+            if (p->x < tamanhoX - 1) p->x++;
+            break;
+        default:
+            printf("Direcao invalida!\n");
+    }
+}
+
+// funcao gerar inimigos aleatorios
+void gerarInimigosAleatorios(Inimigo Inimigos[], int numInimigos, int tamanhoX, int tamanhoY) {
+    for (int i = 0; i < numInimigos; i++) {
+        Inimigos[i].x = rand() % tamanhoX;
+        Inimigos[i].y = rand() % tamanhoY;
+        Inimigos[i].forca = rand() % 10 + 1;
+        Inimigos[i].vida = 1;
+    }
+}
+// funcao gerar itens aleatorios
+void gerarItensAleatorios(Item Itens[], int numItens, int tamanhoX, int tamanhoY) {
+    for (int i = 0; i < numItens; i++) {
+        Itens[i].x = rand() % tamanhoX;
+        Itens[i].y = rand() % tamanhoY;
+        Itens[i].valor = rand() % 10 + 1;
+    }
+}
+
 int main() {
 
     printf("--------------------------------------------------------------------------------\n");
