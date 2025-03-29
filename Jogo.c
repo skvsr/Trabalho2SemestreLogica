@@ -32,6 +32,10 @@ Item *itens;
 int numInimigos, numItens, tamanhoX, tamanhoY;
 
 void iniciar() {
+    printf("Digite o tamanho do mapa (Largura Altura): ");
+    scanf("%d %d", &tamanhoX, &tamanhoY);
+    getchar(); // Limpa o buffer do teclado
+
     p = (Personagem *)malloc(sizeof(Personagem));
     p->nome = (char *)malloc(50 * sizeof(char));
 
@@ -43,9 +47,9 @@ void iniciar() {
 }
 
 // Funcao do personagem
-void criaPersonagem(Personagem *p, char nome[50], int forca, int velocidade) {
+void criaPersonagem(Personagem *p, char *nome, int forca, int velocidade) {
     printf("Digite o nome do personagem: ");
-    fgets(p->nome, sizeof(p->nome), stdin);
+    fgets(p->nome, 50, stdin);
     p->nome[strcspn(p->nome, "\n")] = 0;
     p->forca = 10;
     p->velocidade = 1;
