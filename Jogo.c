@@ -31,6 +31,41 @@ Inimigo *inimigos;
 Item *itens;
 int numInimigos, numItens, tamanhoX, tamanhoY;
 
+void salvarJogo() {
+    FILE *file = fopen("savegame.dat", "wb");
+    if (!file) {
+        printf("Erro ao salvar o jogo!\n");
+        return;
+    }
+    fwrite(&p, sizeof(Personagem), 1, file);
+    fwrite(&tamanhoX, sizeof(int), 1, file);
+    fwrite(&tamanhoY, sizeof(int), 1, file);
+    fwrite(&numInimigos, sizeof(int), 1, file);
+    fwrite(&numItens, sizeof(int), 1, file);
+    fwrite(inimigos, sizeof(Inimigo), numInimigos, file);
+    fwrite(itens, sizeof(Item), numItens, file);
+    fclose(file);
+    printf("Jogo salvo com sucesso!\n");
+}
+
+void carregarJogo() {
+    FILE *file = fopen("savegame.dat", "rb");
+    if (!file) {
+        printf("Nenhum jogo salvo encontrado!\n");
+        return;
+    }
+    fread(&p, sizeof(Personagem), 1, file);
+    fread(&tamanhoX, sizeof(int), 1, file);
+    fread(&tamanhoY, sizeof(int), 1, file);
+    fread(&numInimigos, sizeof(int), 1, file);
+    fread(&numItens, sizeof(int), 1, file);
+    inimigos = (Inimigo *)malloc(numInimigos * sizeof(Inimigo));
+    itens = (Item *)malloc(numItens * sizeof(Item));
+    fread(inimigos, sizeof(Inimigo), numInimigos, file);
+    fread(itens, sizeof(Item), numItens, file);
+    fclose(file);
+    printf("Jogo carregado com sucesso!\n");
+
 void iniciar() {
     printf("Digite o tamanho do mapa (Largura Altura): ");
     scanf("%d %d", &tamanhoX, &tamanhoY);
@@ -133,7 +168,7 @@ void Legendas() {
     printf("P - Personagem\n");
     printf("I - Inimigo\n");
     printf("T - Item\n");
-    printf(". - Espaço vazio\n");
+    printf(". - Espaï¿½o vazio\n");
 }
 
 // Funcao de encontros
@@ -212,6 +247,6 @@ int main() {
 	Sleep(2);
 	
 	printf("                               Samuel Vitor                                      \n");
-	
+
     return 0;
 }
