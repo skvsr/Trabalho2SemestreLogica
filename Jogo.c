@@ -230,6 +230,10 @@ void liberarMemoria() {
 
 
 int main() {
+    srand(time(NULL));
+    int tamanhoX, tamanhoY;
+    char direcao;
+    Personagem p;
 
     printf("--------------------------------------------------------------------------------\n");
 	printf("                              BEM VINDO AO                                      \n");
@@ -247,6 +251,41 @@ int main() {
 	Sleep(2);
 	
 	printf("                               Samuel Vitor                                      \n");
+
+    printf("Deseja iniciar um novo jogo ou carregar um ja existente?(N para Novo jogo, C para Carregar existente\n");
+    scanf(" %c", &direcao);
+
+    if (direcao == 'C' || direcao == 'c') {
+        carregarJogo();
+    } else {
+        criaPersonagem(&p);
+
+    }
+    int numInimigos = (tamanhoX * tamanhoY) / 4;
+    int numItens = (tamanhoX * tamanhoY) / 4;
+
+    Inimigo *inimigos = (Inimigo *)malloc(numInimigos * sizeof(Inimigo));
+    Item *itens = (Item *)malloc(numItens * sizeof(Item));
+
+    criarInimigo(inimigos, numInimigos, tamanhoX, tamanhoY, itens, numItens);
+    criarItem(itens, numItens, tamanhoX, tamanhoY, inimigos, numInimigos);
+
+    while (1) {
+        system("cls");
+        exibirMapa(tamanhoX, tamanhoY, &p, inimigos, numInimigos, itens, numItens);
+        Legendas();
+        printf("Digite a direcao (w/a/s/d) ou 'q' para sair: ");
+        scanf(" %c", &direcao);
+        if (direcao == 'q') {
+            salvarJogo();
+            break;
+        }
+        mover(&p, direcao, tamanhoX, tamanhoY);
+        encontros(&p, inimigos, numInimigos, itens, numItens);
+    }
+    
+    free(inimigos);
+    free(itens);
 
     return 0;
 }
