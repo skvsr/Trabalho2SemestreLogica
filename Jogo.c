@@ -279,10 +279,10 @@ int main() {
     scanf(" %c", &direcao);
     getchar(); 
 
-    if (direcao == 'C' || direcao == 'c') {
+    if (direcao == 'C' || direcao == 'c') { // Carregar jogo
         carregarJogo();
     } else {
-        iniciar();
+        iniciar(); // Iniciar novo jogo
         criaPersonagem(p);
 
     }
