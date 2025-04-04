@@ -26,10 +26,10 @@ typedef struct {
 } Item;
 
 // Ponteiros
-Personagem *p;
-Inimigo *inimigos;
-Item *itens;
-int numInimigos, numItens, tamanhoX, tamanhoY;
+Personagem *p = NULL; // Ponteiro para o personagem
+Inimigo *inimigos = NULL; // Ponteiro para os inimigos
+Item *itens = NULL; // Ponteiro para os itens
+int numInimigos, numItens, tamanhoX, tamanhoY; // Variaveis globais para o tamanho do mapa e o numero de inimigos e itens
 
 void salvarJogo() {
     FILE *file = fopen("savegame.dat", "wb");
@@ -37,13 +37,14 @@ void salvarJogo() {
         printf("Erro ao salvar o jogo!\n");
         return;
     }
-    fwrite(&p, sizeof(Personagem), 1, file);
-    fwrite(&tamanhoX, sizeof(int), 1, file);
-    fwrite(&tamanhoY, sizeof(int), 1, file);
-    fwrite(&numInimigos, sizeof(int), 1, file);
-    fwrite(&numItens, sizeof(int), 1, file);
-    fwrite(inimigos, sizeof(Inimigo), numInimigos, file);
-    fwrite(itens, sizeof(Item), numItens, file);
+    fwrite(p, sizeof(Personagem), 1, file); // Salva o personagem
+    fwrite(p->nome, sizeof(char), strlen(p->nome) + 1, file); // Salva o nome do personagem
+    fwrite(&tamanhoX, sizeof(int), 1, file); // Salva o tamanho do mapa
+    fwrite(&tamanhoY, sizeof(int), 1, file); // Salva o tamanho do mapa
+    fwrite(&numInimigos, sizeof(int), 1, file); // Salva o numero de inimigos
+    fwrite(&numItens, sizeof(int), 1, file); // Salva o numero de itens
+    fwrite(inimigos, sizeof(Inimigo), numInimigos, file); // Salva os inimigos
+    fwrite(itens, sizeof(Item), numItens, file); // Salva os itens
     fclose(file);
     printf("Jogo salvo com sucesso!\n");
 }
@@ -54,18 +55,37 @@ void carregarJogo() {
         printf("Nenhum jogo salvo encontrado!\n");
         return;
     }
-    fread(&p, sizeof(Personagem), 1, file);
-    fread(&tamanhoX, sizeof(int), 1, file);
-    fread(&tamanhoY, sizeof(int), 1, file);
-    fread(&numInimigos, sizeof(int), 1, file);
-    fread(&numItens, sizeof(int), 1, file);
-    inimigos = (Inimigo *)malloc(numInimigos * sizeof(Inimigo));
-    itens = (Item *)malloc(numItens * sizeof(Item));
-    fread(inimigos, sizeof(Inimigo), numInimigos, file);
-    fread(itens, sizeof(Item), numItens, file);
+    p = (Personagem *)malloc(sizeof(Personagem)); // Alocação dinamica para o personagem
+        if (!p) {
+        printf("Erro ao alocar memoria para o personagem!\n");
+        fclose(file);
+        }
+    p->nome = (char *)malloc(50 * sizeof(char)); // Alocação dinamica para o nome
+        if (!p->nome) {
+            printf("Erro ao alocar memoria para o nome do personagem!\n");
+            fclose(file);
+        }
+    fread(p, sizeof(Personagem), 1, file); // Leitura do personagem
+    fread(p->nome, sizeof(char), 50, file); // Leitura do nome do personagem
+    fread(&tamanhoX, sizeof(int), 1, file); // Leitura do tamanho do mapa
+    fread(&tamanhoY, sizeof(int), 1, file); // Leitura do tamanho do mapa
+    fread(&numInimigos, sizeof(int), 1, file); // Leitura do numero de inimigos
+    fread(&numItens, sizeof(int), 1, file); // Leitura do numero de itens
+    inimigos = (Inimigo *)malloc(numInimigos * sizeof(Inimigo)); // Alocação dinamica para os inimigos
+        if (!inimigos) {
+        printf("Erro ao alocar memoria para os inimigos!\n");
+        fclose(file);
+        }
+    itens = (Item *)malloc(numItens * sizeof(Item)); // Alocação dinamica para os itens
+        if (!itens) {
+        printf("Erro ao alocar memoria para os itens!\n");
+        fclose(file);
+        }
+    fread(inimigos, sizeof(Inimigo), numInimigos, file); // Leitura dos inimigos 
+    fread(itens, sizeof(Item), numItens, file); // Leitura dos itens
     fclose(file);
     printf("Jogo carregado com sucesso!\n");
-
+}
 void iniciar() {
     printf("Digite o tamanho do mapa (Largura Altura): ");
     scanf("%d %d", &tamanhoX, &tamanhoY);
@@ -74,15 +94,17 @@ void iniciar() {
     p = (Personagem *)malloc(sizeof(Personagem));
     p->nome = (char *)malloc(50 * sizeof(char));
 
-    numInimigos = (tamanhoX * tamanhoY) / 4;
-    numItens = (tamanhoX * tamanhoY) / 4;
+    numInimigos = (tamanhoX * tamanhoY) / 4; // Calculo do numero de inimigos
+    numItens = (tamanhoX * tamanhoY) / 4; // Calculo do numero de itens
 
     inimigos = (Inimigo *)malloc(numInimigos * sizeof(Inimigo));
     itens = (Item *)malloc(numItens * sizeof(Item));
+    criarInimigo(inimigos, numInimigos, tamanhoX, tamanhoY, itens, numItens); // Cria os inimigos
+    criarItem(itens, numItens, tamanhoX, tamanhoY, inimigos, numInimigos); // Cria os itens
 }
 
 // Funcao do personagem
-void criaPersonagem(Personagem *p, char *nome, int forca, int velocidade) {
+void criaPersonagem(Personagem *p) {
     printf("Digite o nome do personagem: ");
     fgets(p->nome, 50, stdin);
     p->nome[strcspn(p->nome, "\n")] = 0;
@@ -222,57 +244,52 @@ void mover(Personagem *p, char direcao, int tamanhoX, int tamanhoY) {
 }
 
 void liberarMemoria() {
-    free(p->nome);
-    free(p);
-    free(inimigos);
-    free(itens);
+    if (p) {
+        free(p->nome);
+        free (p); // Libera a memoria do nome
+    }
+    free(p); // Libera a memoria do personagem
+    free(inimigos); // Libera a memoria dos inimigos
+    free(itens); // Libera a memoria dos itens
 }
 
 
 int main() {
-    srand(time(NULL));
-    int tamanhoX, tamanhoY;
-    char direcao;
-    Personagem p;
+    srand(time(NULL)); // Inicializa o gerador de numeros aleatorios
+    char direcao; // Variavel para a direcao do movimento e opção
 
     printf("--------------------------------------------------------------------------------\n");
 	printf("                              BEM VINDO AO                                      \n");
 	printf("                                RPG GAME!                                        \n");
 	printf("--------------------------------------------------------------------------------\n");
 	
-	Sleep(3);
+	Sleep(2000);
 	
 	printf("                                   BY                                            \n");
 	printf("                              Henrique Costa                                     \n");
 	
-	Sleep(1);
+	Sleep(1000);
 	printf("                             Samuel Pinheiro                                     \n");
 	
-	Sleep(2);
+	Sleep(1000);
 	
 	printf("                               Samuel Vitor                                      \n");
 
     printf("Deseja iniciar um novo jogo ou carregar um ja existente?(N para Novo jogo, C para Carregar existente\n");
     scanf(" %c", &direcao);
+    getchar(); 
 
     if (direcao == 'C' || direcao == 'c') {
         carregarJogo();
     } else {
-        criaPersonagem(&p);
+        iniciar();
+        criaPersonagem(p);
 
     }
-    int numInimigos = (tamanhoX * tamanhoY) / 4;
-    int numItens = (tamanhoX * tamanhoY) / 4;
-
-    Inimigo *inimigos = (Inimigo *)malloc(numInimigos * sizeof(Inimigo));
-    Item *itens = (Item *)malloc(numItens * sizeof(Item));
-
-    criarInimigo(inimigos, numInimigos, tamanhoX, tamanhoY, itens, numItens);
-    criarItem(itens, numItens, tamanhoX, tamanhoY, inimigos, numInimigos);
-
+    
     while (1) {
         system("cls");
-        exibirMapa(tamanhoX, tamanhoY, &p, inimigos, numInimigos, itens, numItens);
+        exibirMapa(tamanhoX, tamanhoY, p, inimigos, numInimigos, itens, numItens);
         Legendas();
         printf("Digite a direcao (w/a/s/d) ou 'q' para sair: ");
         scanf(" %c", &direcao);
@@ -280,12 +297,10 @@ int main() {
             salvarJogo();
             break;
         }
-        mover(&p, direcao, tamanhoX, tamanhoY);
-        encontros(&p, inimigos, numInimigos, itens, numItens);
+        mover(p, direcao, tamanhoX, tamanhoY);
+        encontros(p, inimigos, numInimigos, itens, numItens);
     }
     
-    free(inimigos);
-    free(itens);
-
+    liberarMemoria(); // Libera a memoria alocada
     return 0;
 }
