@@ -106,22 +106,22 @@ void iniciar() {
 // Funcao do personagem
 void criaPersonagem(Personagem *p) {
     printf("Digite o nome do personagem: ");
-    fgets(p->nome, 50, stdin);
-    p->nome[strcspn(p->nome, "\n")] = 0;
-    p->forca = 10;
-    p->velocidade = 1;
-    p->x = 0;
-    p->y = 0;
+    fgets(p->nome, 50, stdin); // Leitura do nome do personagem
+    p->nome[strcspn(p->nome, "\n")] = 0; // Remove o \n do final da string
+    p->forca = 10; // Forca inicial do personagem
+    p->velocidade = 1; // Velocidade inicial do personagem
+    p->x = 0; // Posicao inicial do personagem
+    p->y = 0; // Posicao inicial do personagem
 }
 
 // posicao no mapa
 int posicao(int x, int y, Inimigo Inimigos[], int numInimigos , Item Itens[], int numItens) {
-    for (int i = 0; i < numInimigos; i++) {
-        if (Inimigos[i].x == x && Inimigos[i].y == y && Inimigos[i].vida) {
+    for (int i = 0; i < numInimigos; i++) { // Verifica se a posicao ja esta ocupada por um inimigo
+        if (Inimigos[i].x == x && Inimigos[i].y == y && Inimigos[i].vida) { // Verifica se o inimigo esta vivo
             return 1;
         }
     }
-    for (int i = 0; i < numItens; i++) {
+    for (int i = 0; i < numItens; i++) { // Verifica se a posicao ja esta ocupada por um item
         if (Itens[i].x == x && Itens[i].y == y) {
             return 2;
         }
@@ -133,11 +133,11 @@ int posicao(int x, int y, Inimigo Inimigos[], int numInimigos , Item Itens[], in
 void criarInimigo(Inimigo Inimigos[], int quantidade, int tamanhoX, int tamanhoY, Item Itens[], int numItens) {
     for (int i = 0; i < quantidade; i++) {
         do {
-            Inimigos[i].x = rand() % tamanhoX;
-            Inimigos[i].y = rand() % tamanhoY;
+            Inimigos[i].x = rand() % tamanhoX; // Gera uma posicao aleatoria para o inimigo
+            Inimigos[i].y = rand() % tamanhoY; // Gera uma posicao aleatoria para o inimigo
         } while (posicao(Inimigos[i].x, Inimigos[i].y, Inimigos, i, Itens, numItens));
-        Inimigos[i].forca = rand() % 10 + 1;
-        Inimigos[i].vida = 1;
+        Inimigos[i].forca = rand() % 10 + 1; // Gera uma forca aleatoria para o inimigo
+        Inimigos[i].vida = 1; // Inimigo vivo
     }
 }
 
@@ -145,10 +145,10 @@ void criarInimigo(Inimigo Inimigos[], int quantidade, int tamanhoX, int tamanhoY
 void criarItem(Item Itens[], int quantidade, int tamanhoX, int tamanhoY, Inimigo Inimigos[], int numInimigos) {
     for (int i = 0; i < quantidade; i++) {
         do {
-            Itens[i].x = rand() % tamanhoX;
-            Itens[i].y = rand() % tamanhoY;
+            Itens[i].x = rand() % tamanhoX; // Gera uma posicao aleatoria para o item
+            Itens[i].y = rand() % tamanhoY; // Gera uma posicao aleatoria para o item
         } while (posicao(Itens[i].x, Itens[i].y, Inimigos, numInimigos, Itens, i));
-        Itens[i].valor = rand() % 10 + 1;
+        Itens[i].valor = rand() % 10 + 1; // Gera um valor aleatorio para o item
     }
 }
 
@@ -297,7 +297,7 @@ int main() {
             salvarJogo();
             break;
         }
-        mover(p, direcao, tamanhoX, tamanhoY);
+        mover(p, direcao, tamanhoX, tamanhoY); 
         encontros(p, inimigos, numInimigos, itens, numItens);
     }
     
