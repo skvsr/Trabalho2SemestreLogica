@@ -31,6 +31,15 @@ Inimigo *inimigos = NULL; // Ponteiro para os inimigos
 Item *itens = NULL; // Ponteiro para os itens
 int numInimigos, numItens, tamanhoX, tamanhoY; // Variaveis globais para o tamanho do mapa e o numero de inimigos e itens
 
+void statusPersonagem(Personagem *p) {
+    printf("\n===Status do Personagem===\n");
+    printf("Nome: %s\n", p->nome);
+    printf("Forca: %d\n", p->forca);
+    printf("Velocidade: %d\n", p->velocidade);
+    printf("Posicao: (%d, %d)\n", p->x, p->y);
+    printf("==========================\n");
+}
+
 void salvarJogo() {
     FILE *file = fopen("savegame.dat", "wb");
     if (!file) {
@@ -59,14 +68,19 @@ void carregarJogo() {
         if (!p) {
         printf("Erro ao alocar memoria para o personagem!\n");
         fclose(file);
+        return;
         }
-    p->nome = (char *)malloc(50 * sizeof(char)); // Alocação dinamica para o nome
+        fread(p, sizeof(Personagem), 1, file); // Leitura do personagem
+        char nomeTemp[50]; //- Buffer temporário para nome
+        fread(nomeTemp, sizeof(char), 50, file); //- Lê o nome salvo
+        p->nome = (char *)malloc(strlen(nomeTemp) + 1); //- Aloca tamanho exato
         if (!p->nome) {
             printf("Erro ao alocar memoria para o nome do personagem!\n");
+            free(p); //- Libera personagem
             fclose(file);
+            return;
         }
-    fread(p, sizeof(Personagem), 1, file); // Leitura do personagem
-    fread(p->nome, sizeof(char), 50, file); // Leitura do nome do personagem
+        strcpy(p->nome, nomeTemp); //- Copia nome
     fread(&tamanhoX, sizeof(int), 1, file); // Leitura do tamanho do mapa
     fread(&tamanhoY, sizeof(int), 1, file); // Leitura do tamanho do mapa
     fread(&numInimigos, sizeof(int), 1, file); // Leitura do numero de inimigos
@@ -75,11 +89,13 @@ void carregarJogo() {
         if (!inimigos) {
         printf("Erro ao alocar memoria para os inimigos!\n");
         fclose(file);
+        return;
         }
     itens = (Item *)malloc(numItens * sizeof(Item)); // Alocação dinamica para os itens
         if (!itens) {
         printf("Erro ao alocar memoria para os itens!\n");
         fclose(file);
+        return;
         }
     fread(inimigos, sizeof(Inimigo), numInimigos, file); // Leitura dos inimigos 
     fread(itens, sizeof(Item), numItens, file); // Leitura dos itens
@@ -122,7 +138,7 @@ int posicao(int x, int y, Inimigo Inimigos[], int numInimigos , Item Itens[], in
         }
     }
     for (int i = 0; i < numItens; i++) { // Verifica se a posicao ja esta ocupada por um item
-        if (Itens[i].x == x && Itens[i].y == y) {
+        if (Itens[i].x == x && Itens[i].y == y && Itens[i].valor > 0) { // Verifica se o item esta vivo
             return 2;
         }
     }
@@ -135,7 +151,8 @@ void criarInimigo(Inimigo Inimigos[], int quantidade, int tamanhoX, int tamanhoY
         do {
             Inimigos[i].x = rand() % tamanhoX; // Gera uma posicao aleatoria para o inimigo
             Inimigos[i].y = rand() % tamanhoY; // Gera uma posicao aleatoria para o inimigo
-        } while (posicao(Inimigos[i].x, Inimigos[i].y, Inimigos, i, Itens, numItens));
+        } while (posicao(Inimigos[i].x, Inimigos[i].y, Inimigos, i, Itens, numItens) ||
+        (p && p->x == Inimigos[i].x && p->y == Inimigos[i].y)); // Verifica se a posicao ja esta ocupada por um inimigo ou pelo personagem
         Inimigos[i].forca = rand() % 10 + 1; // Gera uma forca aleatoria para o inimigo
         Inimigos[i].vida = 1; // Inimigo vivo
     }
@@ -147,7 +164,8 @@ void criarItem(Item Itens[], int quantidade, int tamanhoX, int tamanhoY, Inimigo
         do {
             Itens[i].x = rand() % tamanhoX; // Gera uma posicao aleatoria para o item
             Itens[i].y = rand() % tamanhoY; // Gera uma posicao aleatoria para o item
-        } while (posicao(Itens[i].x, Itens[i].y, Inimigos, numInimigos, Itens, i));
+        } while (posicao(Itens[i].x, Itens[i].y, Inimigos, numInimigos, Itens, i) ||
+        (p && p->x == Itens[i].x && p->y == Itens[i].y)); // Verifica se a posicao ja esta ocupada por um inimigo ou pelo personagem
         Itens[i].valor = rand() % 10 + 1; // Gera um valor aleatorio para o item
     }
 }
@@ -166,6 +184,7 @@ void exibirMapa(int tamanhoX, int tamanhoY, Personagem *p, Inimigo Inimigos[], i
         for (int j = 0; j < tamanhoX; j++) {
             if (i == p->y && j == p->x) {
                 printf("P ");
+                continue; // Se for a posicao do personagem, imprime P e continua
             } else if (posicao(j, i, Inimigos, numInimigos, Itens, numItens) == 1) {
                 printf("I ");
             } else if (posicao(j, i, Inimigos, numInimigos, Itens, numItens) == 2) {
@@ -210,11 +229,16 @@ void encontros(Personagem *p, Inimigo Inimigos[], int numInimigos, Item Itens[],
         }
     }
     for (int i = 0; i < numItens; i++) {
-        if (Itens[i].x == p->x && Itens[i].y == p->y) {
+        if (Itens[i].x == p->x && Itens[i].y == p->y && Itens[i].valor > 0) {
             printf("Voce encontrou um item!\n");
             printf("Valor do item: %d\n", Itens[i].valor);
-            p->forca += Itens[i].valor;
-            Itens[i].valor = 0;
+            int tipo = rand() % 2; // Tipo do item (0 = forca, 1 = velocidade)
+            if (tipo == 0) {
+                printf("Este item aumentou sua forca!\n");
+                p->forca += Itens[i].valor; // Aumenta a forca do personagem
+            } else { printf("Este item aumentou sua velocidade!\n");
+                p->velocidade += Itens[i].valor; // Aumenta a velocidade do personagem
+            } Itens[i].valor = 0; // Remove o item do mapa
         }
     }
 }
@@ -248,7 +272,6 @@ void liberarMemoria() {
         free(p->nome);
         free (p); // Libera a memoria do nome
     }
-    free(p); // Libera a memoria do personagem
     free(inimigos); // Libera a memoria dos inimigos
     free(itens); // Libera a memoria dos itens
 }
@@ -296,9 +319,14 @@ int main() {
         if (direcao == 'q') {
             salvarJogo();
             break;
+        } else if (direcao == 'e') {
+            statusPersonagem(p); // Exibe o status do personagem
+            Sleep(5000); // Pausa para o jogador ver o status
+            continue;
         }
         mover(p, direcao, tamanhoX, tamanhoY); 
         encontros(p, inimigos, numInimigos, itens, numItens);
+        Sleep(200); // Pausa para o jogador ver o mapa
     }
     
     liberarMemoria(); // Libera a memoria alocada
