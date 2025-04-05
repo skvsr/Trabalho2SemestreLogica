@@ -225,8 +225,20 @@ void encontros(Personagem *p, Inimigo Inimigos[], int numInimigos, Item Itens[],
                 printf("Voce venceu o inimigo!\n");
                 Inimigos[i].vida = 0;
             } else {
-                printf("Voce perdeu para o inimigo!\n");
-                exit(0);
+                printf("Este inimigo é mais forte que voce agora!");
+                printf("Deseja fugir? (s/n)");
+                char escolha;
+                scanf(" %c", &escolha);
+                if (escolha == 's' || escolha == 'S') {
+                    int chanceFugir = rand() % 10; // Chance de fugir
+                    if (chanceFugir < p->velocidade) {
+                        printf("Voce conseguiu fugir!\n");
+                        return;
+                    } else {
+                        printf("Voce nao conseguiu fugir e foi derrotado!\n");
+                        exit(0); // Encerra o jogo se o personagem não conseguir fugir
+                    } 
+                }
             }
         }
     }
@@ -248,7 +260,7 @@ void encontros(Personagem *p, Inimigo Inimigos[], int numInimigos, Item Itens[],
 void mover(Personagem *p, char direcao, int tamanhoX, int tamanhoY) {
     int rapido = p->velocidade <= 2 ? p->velocidade : 2; // Verifica se a velocidade é menor ou igual a 1, se sim, rapido = 1, se não, rapido = velocidade
     int passos;
-    printf("Quantos passos deseja andar? (1 ou %d): ", rapido);
+    printf("Quantos passos deseja andar? (1 até %d): ", rapido);
     scanf("%d", &passos); // Leitura do numero de passos
     if (passos < 1 ) passos = 1; // Verifica se o numero de passos é menor que 1, se sim, passos = 1
     if (passos > rapido) passos = rapido; // Verifica se o numero de passos é maior que a velocidade do personagem, se sim, rapido = velocidade
