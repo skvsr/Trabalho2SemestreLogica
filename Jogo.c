@@ -314,7 +314,7 @@ int main() {
         system("cls");
         exibirMapa(tamanhoX, tamanhoY, p, inimigos, numInimigos, itens, numItens);
         Legendas();
-        printf("Digite a direcao (w/a/s/d) ou 'q' para sair: ");
+        printf("Digite a direcao (w/a/s/d), 'e' para ver status e 'q' para sair: ");
         scanf(" %c", &direcao);
         if (direcao == 'q') {
             salvarJogo();
