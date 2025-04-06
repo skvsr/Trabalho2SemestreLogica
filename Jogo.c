@@ -340,12 +340,7 @@ int main() {
 
     Sleep(2000);
     printf("                                   BY                                           \n");
-    printf("                              Henrique Costa                                    \n");
-    Sleep(800);
-    printf("                             Samuel  Pinheiro                                    \n");
-    Sleep(800);
-    printf("                               Samuel Vitor                                     \n");
-	Sleep(800);
+    printf("                 Henrique Costa, Samuel  Pinheiro, Samuel Vitor                 \n");
 	
     printf("\nDeseja iniciar um novo jogo ou carregar um já existente? (N/C): ");
     scanf(" %c", &direcao);
@@ -368,10 +363,7 @@ while (1) {
     if (direcao == 'q') {
         salvarJogo();
         break;
-    } else if (direcao == 'e') {
-        statusPersonagem(p);
-        system("pause");
-    } else {
+    }  else {
         mover(p, direcao, tamanhoX, tamanhoY);
         encontros(p, inimigos, numInimigos, itens, numItens);
 
