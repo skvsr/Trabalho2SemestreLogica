@@ -25,11 +25,45 @@ typedef struct {
     int x, y;
 } Item;
 
-// Ponteiros
-Personagem *p = NULL; // Ponteiro para o personagem
-Inimigo *inimigos = NULL; // Ponteiro para os inimigos
-Item *itens = NULL; // Ponteiro para os itens
-int numInimigos, numItens, tamanhoX, tamanhoY; // Variaveis globais para o tamanho do mapa e o numero de inimigos e itens
+// ==== Variáveis Globais ====
+Personagem *p = NULL;
+Inimigo *inimigos = NULL;
+Item *itens = NULL;
+int numInimigos, numItens, tamanhoX, tamanhoY;
+
+// ==== Protótipos ====
+void statusPersonagem(Personagem *p);
+void salvarJogo();
+void carregarJogo();
+void iniciar();
+void criaPersonagem(Personagem *p);
+int posicao(int x, int y, Inimigo Inimigos[], int numInimigos , Item Itens[], int numItens);
+void criarInimigo(Inimigo Inimigos[], int quantidade, int tamanhoX, int tamanhoY, Item Itens[], int numItens);
+void criarItem(Item Itens[], int quantidade, int tamanhoX, int tamanhoY, Inimigo Inimigos[], int numInimigos);
+void exibirMapa(int tamanhoX, int tamanhoY, Personagem *p, Inimigo Inimigos[], int numInimigos, Item Itens[], int numItens);
+void Legendas();
+void encontros(Personagem *p, Inimigo Inimigos[], int numInimigos, Item Itens[], int numItens);
+void mover(Personagem *p, char direcao, int tamanhoX, int tamanhoY);
+void liberarMemoria();
+
+// ==== Implementações ====
+
+Personagem jogador;
+Inimigo inimigo;
+Item item;
+
+void delay(int milissegundos) {
+    Sleep(milissegundos);
+}
+void statusPersonagem(Personagem *p) {
+    printf("\n=== Status do Personagem ===\n");
+    printf("Nome: %s\n", p->nome);
+    printf("Força: %d\n", p->forca);
+    printf("Velocidade: %d\n", p->velocidade);
+    printf("Posição: (%d, %d)\n", p->x, p->y);
+    printf("==========================\n");
+    Sleep(900);
+}
 
 void salvarJogo() {
     FILE *arquivo = fopen("save.txt", "wb");
@@ -175,40 +209,63 @@ void exibirMapa(int tamanhoX, int tamanhoY, Personagem *p, Inimigo Inimigos[], i
     printf("-\n");
 }
 
-void Legendas() {
-    printf("\nLegenda:\n");
-    printf("P - Personagem\n");
-    printf("I - Inimigo\n");
-    printf("T - Item\n");
-    printf(". - Espaï¿½o vazio\n");
+
+void Legendas(char legenda[][40]) {
+    strcpy(legenda[0], "Legenda:");
+    strcpy(legenda[1], "P - Personagem");
+    strcpy(legenda[2], "I - Inimigo");
+    strcpy(legenda[3], "T - Item");
+    strcpy(legenda[4], ". - Espaço vazio");
 }
 
-// Funcao de encontros
+void exibirPainelLateral(Personagem *p) {
+    char legenda[LINHAS_LEGENDA][40];
+    Legendas(legenda);
+
+    char status[LINHAS_LEGENDA][40];
+    snprintf(status[0], 40, "Status:");
+    snprintf(status[1], 40, "Nome: %s", p->nome);
+    snprintf(status[2], 40, "Forca: %d", p->forca);
+    snprintf(status[3], 40, "Velocidade: %d", p->velocidade);
+    snprintf(status[4], 40, "Posição: (%d, %d)", p->x, p->y);
+
+    // Imprime a linha separadora sem os títulos em caixa alta
+    printf("-------------------------------------------------------------\n");
+
+    for (int i = 0; i < LINHAS_LEGENDA; i++) {
+        printf("%-25s\t%-25s\n", legenda[i], status[i]);
+    }
+
+    printf("-------------------------------------------------------------\n\n");
+}
+
+
+
 void encontros(Personagem *p, Inimigo Inimigos[], int numInimigos, Item Itens[], int numItens) {
     for (int i = 0; i < numInimigos; i++) {
         if (Inimigos[i].x == p->x && Inimigos[i].y == p->y && Inimigos[i].vida) {
             printf("Voce encontrou um inimigo!\n");
-            printf("Forca do inimigo: %d\n", Inimigos[i].forca);
+            printf("Força do inimigo: %d\n", Inimigos[i].forca);
             printf("Sua forca: %d\n", p->forca);
             Sleep(3000);
             if (p->forca > Inimigos[i].forca) {
-                printf("Voce venceu o inimigo!\n");
+                printf("Você venceu o inimigo!\n");
                 Inimigos[i].vida = 0;
                 Sleep(1200);
             } else {
-                printf("Este inimigo é mais forte que voce agora!");
-                printf("Deseja fugir? (s/n)");
+                printf("Este inimigo é mais forte que você agora! Deseja fugir? (s/n) ");
                 char escolha;
                 scanf(" %c", &escolha);
                 if (escolha == 's' || escolha == 'S') {
-                    int chanceFugir = rand() % 10; // Chance de fugir
-                    if (chanceFugir < p->velocidade) {
-                        printf("Voce conseguiu fugir!\n");
+                    if (rand() % 10 < p->velocidade) {
+                        printf("Você conseguiu fugir!\n");
+                        Sleep(2000);
                         return;
                     } else {
-                        printf("Voce nao conseguiu fugir e foi derrotado!\n");
-                        exit(0); // Encerra o jogo se o personagem não conseguir fugir
-                    } 
+                        printf("Você não conseguiu fugir e foi derrotado!\n");
+                        Sleep(2000);
+                        exit(0);
+                    }
                 }
             }
         }
@@ -216,45 +273,48 @@ void encontros(Personagem *p, Inimigo Inimigos[], int numInimigos, Item Itens[],
 
     for (int i = 0; i < numItens; i++) {
         if (Itens[i].x == p->x && Itens[i].y == p->y && Itens[i].valor > 0) {
-            printf("Voce encontrou um item!\n");
+            printf("Você encontrou um item!\n");
             printf("Valor do item: %d\n", Itens[i].valor);
-            int tipo = rand() % 2; // Tipo do item (0 = forca, 1 = velocidade)
-            if (tipo == 0) {
-                printf("Este item aumentou sua forca!\n");
-                p->forca += Itens[i].valor; // Aumenta a forca do personagem
-            } else { printf("Este item aumentou sua velocidade!\n");
-                p->velocidade += Itens[i].valor; // Aumenta a velocidade do personagem
-            } Itens[i].valor = 0; // Remove o item do mapa
+            Sleep(1000);
+            if (rand() % 2 == 0) {
+                printf("Este item aumentou sua força!\n");
+                Sleep(1000);
+                p->forca += Itens[i].valor;
+            } else {
+                printf("Este item aumentou sua velocidade!\n");
+                Sleep(1000);
+                p->velocidade += Itens[i].valor;
+            }
+            Itens[i].valor = 0;
         }
     }
 }
-// Funcao de movimento
+
+int inimigosRestantes(Inimigo inimigos[], int numInimigos) {
+    for (int i = 0; i < numInimigos; i++) {
+        if (inimigos[i].vida > 0) {
+            return 1; // Ainda existem inimigos vivos
+        }
+    }
+    return 0; // Todos foram derrotados
+}
+
+
 void mover(Personagem *p, char direcao, int tamanhoX, int tamanhoY) {
     int rapido = p->velocidade <= 2 ? p->velocidade : 2;
     int passos;
     printf("Quantos passos deseja andar? (1 até %d): ", rapido);
-    scanf("%d", &passos); // Leitura do numero de passos
-    if (passos < 1 ) passos = 1; // Verifica se o numero de passos é menor que 1, se sim, passos = 1
-    if (passos > rapido) passos = rapido; // Verifica se o numero de passos é maior que a velocidade do personagem, se sim, rapido = velocidade
+    scanf("%d", &passos);
+    getchar();
+    if (passos < 1) passos = 1;
+    if (passos > rapido) passos = rapido;
+
     switch (direcao) {
-        case 'w':
-            if (p->y - passos >= 0) p->y-= passos;
-            else p->y = 0;
-            break;
-        case 's':
-            if (p->y + passos < tamanhoY) p->y+= passos;
-            else p->y = tamanhoY - 1;
-            break;
-        case 'a':
-            if (p->x - passos  >= 0) p->x-= passos;
-            else p->x = 0;
-            break;
-        case 'd':
-            if (p->x + passos < tamanhoX) p->x+= passos;
-            else p->x = tamanhoX - 1;
-            break;
-        default:
-            printf("Direcao invalida!\n");
+        case 'w': p->y = (p->y - passos >= 0) ? p->y - passos : 0; break;
+        case 's': p->y = (p->y + passos < tamanhoY) ? p->y + passos : tamanhoY - 1; break;
+        case 'a': p->x = (p->x - passos >= 0) ? p->x - passos : 0; break;
+        case 'd': p->x = (p->x + passos < tamanhoX) ? p->x + passos : tamanhoX - 1; break;
+        default: printf("Direção inválida!\n");
     }
 }
 
@@ -267,30 +327,27 @@ void liberarMemoria() {
     free(itens);
 }
 
-
+// ==== Função Principal ====
 int main() {
     srand(time(NULL));
     char direcao;
     setlocale (LC_ALL,"Portuguese");
 
     printf("--------------------------------------------------------------------------------\n");
-	printf("                              BEM VINDO AO                                      \n");
-	printf("                                RPG GAME!                                        \n");
-	printf("--------------------------------------------------------------------------------\n");
-	
-	Sleep(3);
-	
-	printf("                                   BY                                            \n");
-	printf("                              Henrique Costa                                     \n");
-	
-	Sleep(1);
-	printf("                             Samuel Pinheiro                                     \n");
-	
-	Sleep(2);
-	
-	printf("                               Samuel Vitor                                      \n");
+    printf("                              BEM VINDO AO                                      \n");
+    printf("                                RPG GAME!                                       \n");
+    printf("--------------------------------------------------------------------------------\n");
 
-    printf("Deseja iniciar um novo jogo ou carregar um ja existente?(N para Novo jogo, C para Carregar existente\n");
+    Sleep(2000);
+    printf("                                   BY                                           \n");
+    printf("                              Henrique Costa                                    \n");
+    Sleep(800);
+    printf("                             Samuel  Pinheiro                                    \n");
+    Sleep(800);
+    printf("                               Samuel Vitor                                     \n");
+	Sleep(800);
+	
+    printf("\nDeseja iniciar um novo jogo ou carregar um já existente? (N/C): ");
     scanf(" %c", &direcao);
     getchar();
 
@@ -300,14 +357,27 @@ int main() {
         iniciar();
         criaPersonagem(p);
     }
-    
-    while (1) {
-        system("cls");
-        exibirMapa(tamanhoX, tamanhoY, p, inimigos, numInimigos, itens, numItens);
-        Legendas();
-        printf("Digite a direcao (w/a/s/d), 'e' para ver status e 'q' para sair: ");
-        scanf(" %c", &direcao);
-        if (direcao == 'q') {
+
+while (1) {
+    system("cls");
+    exibirMapa(tamanhoX, tamanhoY, p, inimigos, numInimigos, itens, numItens);
+    exibirPainelLateral(p);
+    printf("Digite a direção (w/a/s/d), 'q' para sair: ");
+    scanf(" %c", &direcao);
+
+    if (direcao == 'q') {
+        salvarJogo();
+        break;
+    } else if (direcao == 'e') {
+        statusPersonagem(p);
+        system("pause");
+    } else {
+        mover(p, direcao, tamanhoX, tamanhoY);
+        encontros(p, inimigos, numInimigos, itens, numItens);
+
+        // Verifica se venceu o jogo
+        if (!inimigosRestantes(inimigos, numInimigos)) {
+            printf("\nParabéns! Você derrotou todos os inimigos!\n");
             salvarJogo();
             break;
         }
