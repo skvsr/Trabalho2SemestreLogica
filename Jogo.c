@@ -91,6 +91,8 @@ void iniciar() {
     scanf("%d %d", &tamanhoX, &tamanhoY);
     getchar(); // Limpa o buffer do teclado
 
+    exibirMapa(tamanhoX, tamanhoY, p, NULL, NULL, 0, NULL, 0); // Exibe o mapa, se Deus quiser vazio
+
     p = (Personagem *)malloc(sizeof(Personagem));
     p->nome = (char *)malloc(50 * sizeof(char));
 
@@ -162,7 +164,7 @@ void exibirMapa(int tamanhoX, int tamanhoY, Personagem *p, Inimigo Inimigos[], i
     for (int i = 0; i < tamanhoY; i++) {
         printf("| "); // borda lateral
         for (int j = 0; j < tamanhoX; j++) {
-            if (i == p->y && j == p->x) {
+            if (p != NULL && i == p->y && j == p->x) {
                 printf("P ");
                 continue; // Se for a posicao do personagem, imprime P e continua
             } else if (posicao(j, i, Inimigos, numInimigos, Itens, numItens) == 1) {
@@ -203,8 +205,20 @@ void encontros(Personagem *p, Inimigo Inimigos[], int numInimigos, Item Itens[],
                 printf("Voce venceu o inimigo!\n");
                 Inimigos[i].vida = 0;
             } else {
-                printf("Voce perdeu para o inimigo!\n");
-                exit(0);
+                printf("Este inimigo é mais forte que voce agora!");
+                printf("Deseja fugir? (s/n)");
+                char escolha;
+                scanf(" %c", &escolha);
+                if (escolha == 's' || escolha == 'S') {
+                    int chanceFugir = rand() % 10; // Chance de fugir
+                    if (chanceFugir < p->velocidade) {
+                        printf("Voce conseguiu fugir!\n");
+                        return;
+                    } else {
+                        printf("Voce nao conseguiu fugir e foi derrotado!\n");
+                        exit(0); // Encerra o jogo se o personagem não conseguir fugir
+                    } 
+                }
             }
         }
     }
@@ -224,22 +238,27 @@ void encontros(Personagem *p, Inimigo Inimigos[], int numInimigos, Item Itens[],
 }
 // Funcao de movimento
 void mover(Personagem *p, char direcao, int tamanhoX, int tamanhoY) {
-    int rapido = p->velocidade;
+    int rapido = p->velocidade <= 2 ? p->velocidade : 2; // Verifica se a velocidade é menor ou igual a 1, se sim, rapido = 1, se não, rapido = velocidade
+    int passos;
+    printf("Quantos passos deseja andar? (1 até %d): ", rapido);
+    scanf("%d", &passos); // Leitura do numero de passos
+    if (passos < 1 ) passos = 1; // Verifica se o numero de passos é menor que 1, se sim, passos = 1
+    if (passos > rapido) passos = rapido; // Verifica se o numero de passos é maior que a velocidade do personagem, se sim, rapido = velocidade
     switch (direcao) {
         case 'w':
-            if (p->y - rapido >= 0) p->y-= rapido;
+            if (p->y - passos >= 0) p->y-= passos;
             else p->y = 0;
             break;
         case 's':
-            if (p->y + rapido < tamanhoY) p->y+= rapido;
+            if (p->y + passos < tamanhoY) p->y+= passos;
             else p->y = tamanhoY - 1;
             break;
         case 'a':
-            if (p->x - rapido  >= 0) p->x-= rapido;
+            if (p->x - passos  >= 0) p->x-= passos;
             else p->x = 0;
             break;
         case 'd':
-            if (p->x + rapido < tamanhoX) p->x+= rapido;
+            if (p->x + passos < tamanhoX) p->x+= passos;
             else p->x = tamanhoX - 1;
             break;
         default:
@@ -293,7 +312,7 @@ int main() {
         system("cls");
         exibirMapa(tamanhoX, tamanhoY, p, inimigos, numInimigos, itens, numItens);
         Legendas();
-        printf("Digite a direcao (w/a/s/d) ou 'q' para sair: ");
+        printf("Digite a direcao (w/a/s/d), 'e' para ver status e 'q' para sair: ");
         scanf(" %c", &direcao);
         if (direcao == 'q') {
             salvarJogo();
